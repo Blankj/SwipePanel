@@ -252,11 +252,12 @@ public class SwipePanel extends FrameLayout {
         if (parent instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) parent;
             int i = group.indexOfChild(view);
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
             group.removeViewAt(i);
-            addView(view);
-            group.addView(this, i);
+            group.addView(this, i, layoutParams);
+            addView(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         } else {
-            addView(view);
+            addView(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         }
     }
 
