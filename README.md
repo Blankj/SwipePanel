@@ -82,4 +82,4 @@ swipePanel.setOnFullSwipeListener(new SwipePanel.OnFullSwipeListener() {// 设�
 |close                                |---                                   |关闭|
 
 
-
+## [Change Log](https://github.com/Blankj/SwipePanel/blob/master/CHANGELOG.md)
