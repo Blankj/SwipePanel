@@ -71,11 +71,11 @@ swipePanel.setOnFullSwipeListener(new SwipePanel.OnFullSwipeListener() {// 设�
 
 |方法名                                |属性名                                 |说明|
 |:---:                                |:---:                                 |:---:|
-|setLeft(Top, Right, Bottom)SwipeColor|app:left(top, right, bottom)SwipeColor|设置左（上、右、下）划颜色|
-|setLeft(Top, Right, Bottom)EdgeSize  |app:left(top, right, bottom)EdgeSize  |设置左（上、右、下）划触发阈值|
-|setLeft(Top, Right, Bottom)Drawable  |app:left(top, right, bottom)Drawable  |设置左（上、右、下）划 icon|
-|setLeft(Top, Right, Bottom)Center    |app:isLeft(Top, Right, Bottom)Center  |设置左（上、右、下）划是否居中|
-|setLeft(Top, Right, Bottom)Enabled   |app:isLeft(Top, Right, Bottom)Enabled |设置左（上、右、下）划是否可用|
+|setLeft(Top, Right, Bottom)SwipeColor|app:left(top, right, bottom)SwipeColor|设置左（上、右、下）测颜色|
+|setLeft(Top, Right, Bottom)EdgeSize  |app:left(top, right, bottom)EdgeSize  |设置左（上、右、下）测触发阈值|
+|setLeft(Top, Right, Bottom)Drawable  |app:left(top, right, bottom)Drawable  |设置左（上、右、下）测 icon|
+|setLeft(Top, Right, Bottom)Center    |app:isLeft(Top, Right, Bottom)Center  |设置左（上、右、下）测是否居中|
+|setLeft(Top, Right, Bottom)Enabled   |app:isLeft(Top, Right, Bottom)Enabled |设置左（上、右、下）测是否可用|
 |wrapView                             |---                                   |设置嵌套在该 view 的外层|
 |setOnFullSwipeListener               |---                                   |设置完全划开松手后的监听|
 |isOpen                               |---                                   |判断是否被划开|
