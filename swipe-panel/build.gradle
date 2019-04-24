@@ -26,3 +26,4 @@ dependencies {
 }
 
 apply from: "${rootDir.path}/gradle/bintrayUploadAndroid.gradle"
+//./gradlew clean bintrayUpload

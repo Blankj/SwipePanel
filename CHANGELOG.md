@@ -1,1 +1,1 @@
-* `19/04/24`: init the project.
+* `19/04/24`: init the project, publish 1.0.
