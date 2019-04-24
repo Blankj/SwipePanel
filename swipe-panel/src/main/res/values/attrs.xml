@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SwipePanel">
+        <attr name="leftSwipeColor" format="color" />
+        <attr name="topSwipeColor" format="color" />
+        <attr name="rightSwipeColor" format="color" />
+        <attr name="bottomSwipeColor" format="color" />
+        <attr name="leftEdgeSize" format="dimension" />
+        <attr name="topEdgeSize" format="dimension" />
+        <attr name="rightEdgeSize" format="dimension" />
+        <attr name="bottomEdgeSize" format="dimension" />
+        <attr name="leftDrawable" format="reference" />
+        <attr name="topDrawable" format="reference" />
+        <attr name="rightDrawable" format="reference" />
+        <attr name="bottomDrawable" format="reference" />
+        <attr name="isLeftCenter" format="boolean" />
+        <attr name="isTopCenter" format="boolean" />
+        <attr name="isRightCenter" format="boolean" />
+        <attr name="isBottomCenter" format="boolean" />
+        <attr name="isLeftEnabled" format="boolean" />
+        <attr name="isTopEnabled" format="boolean" />
+        <attr name="isRightEnabled" format="boolean" />
+        <attr name="isBottomEnabled" format="boolean" />
+    </declare-styleable>
+</resources>
