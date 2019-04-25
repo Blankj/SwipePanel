@@ -1,5 +1,9 @@
 # SwipePanel（侧划控件）
 
+## Background
+
+对市面上实现的侧划返回不是很满意（仿微信，QQ 通过修改窗口透明坑太多），最终决定还是亲手写一个高实用性的吧，效果如下所示，换个图标，更多划动功能可以由你自己解锁，总共一个 600 多行代码的类，推荐通过阅读源码，你肯定会收获很多哈。
+
 
 ## Preview
 
@@ -20,8 +24,8 @@ implementation 'com.blankj:swipe-panel:1.0'
 
 ```java
 final SwipePanel swipePanel = new SwipePanel(this);
-swipePanel.setLeftEdgeSize(SizeUtils.dp2px(100));// 设置左划触发阈值 100dp
-swipePanel.setLeftDrawable(R.drawable.base_back);// 设置左划 icon
+swipePanel.setLeftEdgeSize(SizeUtils.dp2px(100));// 设置左侧触发阈值 100dp
+swipePanel.setLeftDrawable(R.drawable.base_back);// 设置左侧 icon
 swipePanel.wrapView(findViewById(R.id.rootLayout));// 设置嵌套在 rootLayout 外层
 swipePanel.setOnFullSwipeListener(new SwipePanel.OnFullSwipeListener() {// 设置完全划开松手后的监听
     @Override
@@ -47,19 +51,7 @@ swipePanel.setOnFullSwipeListener(new SwipePanel.OnFullSwipeListener() {// 设�
         app:isLeftCenter="false"
         app:leftEdgeSize="100dp"
         app:leftSwipeColor="@color/colorPrimary"
-        app:leftDrawable="@drawable/base_back"
-        app:isTopCenter="true"
-        app:topEdgeSize="100dp"
-        app:topSwipeColor="@color/colorAccent"
-        app:topDrawable="@mipmap/ic_launcher_round"
-        app:isRightCenter="false"
-        app:rightEdgeSize="100dp"
-        app:rightSwipeColor="@color/colorPrimary"
-        app:rightDrawable="@drawable/base_back"
-        app:isBottomCenter="true"
-        app:bottomEdgeSize="100dp"
-        app:bottomSwipeColor="@color/colorAccent"
-        app:bottomDrawable="@mipmap/ic_launcher_round">
+        app:leftDrawable="@drawable/base_back">
 
     ...
 
