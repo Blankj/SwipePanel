@@ -1,7 +1,9 @@
 package com.blankj.swipepanel;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.*;
@@ -279,7 +281,7 @@ public class SwipePanel extends FrameLayout {
 
     public void close(@Direction int direction) {
         mCloses[direction] = true;
-        mStartSpeed[direction] = 0.01f;
+        mStartSpeed[direction] = 0f;
         postInvalidate();
     }
 
@@ -440,6 +442,12 @@ public class SwipePanel extends FrameLayout {
     private boolean animClose(int direction) {
         if (mCloses[direction]) {
             if (progresses[direction] > 0) {
+                Activity activity = getActivityByView(this);
+                if (activity != null && activity.isFinishing()) {
+                    progresses[direction] = 0;
+                    mCloses[direction] = false;
+                    return true;
+                }
                 progresses[direction] -= mStartSpeed[direction];
                 if (progresses[direction] <= 0) {
                     progresses[direction] = 0;
@@ -587,6 +595,20 @@ public class SwipePanel extends FrameLayout {
             getChildAt(i).dispatchTouchEvent(cancelEvent);
         }
         cancelEvent.recycle();
+    }
+
+    private static Activity getActivityByView(@NonNull View view) {
+        return getActivityByContext(view.getContext());
+    }
+
+    private static Activity getActivityByContext(@NonNull Context context) {
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity) context;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return null;
     }
 
     private static int dp2px(final float dpValue) {
