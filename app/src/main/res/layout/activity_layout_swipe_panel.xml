@@ -15,7 +15,7 @@
         app:isTopCenter="true"
         app:topEdgeSize="100dp"
         app:topSwipeColor="@color/colorAccent"
-        app:topDrawable="@mipmap/ic_launcher_round"
+        app:topDrawable="@drawable/ic_rotate"
         app:isRightCenter="false"
         app:rightEdgeSize="100dp"
         app:rightSwipeColor="@color/colorPrimary"
@@ -26,8 +26,6 @@
         app:bottomDrawable="@mipmap/ic_launcher_round">
 
     <android.support.constraint.ConstraintLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

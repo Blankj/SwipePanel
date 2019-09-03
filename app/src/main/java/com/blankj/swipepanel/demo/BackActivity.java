@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import com.blankj.swipepanel.SwipePanel;
+import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.SizeUtils;
 
 public class BackActivity extends AppCompatActivity {
@@ -27,7 +28,13 @@ public class BackActivity extends AppCompatActivity {
             @Override
             public void onFullSwipe(int direction) {
                 finish();
-                swipePanel.close(direction);// 关闭
+                swipePanel.close(true);// 关闭
+            }
+        });
+        swipePanel.setOnProgressChangedListener(new SwipePanel.OnProgressChangedListener() {
+            @Override
+            public void onProgressChanged(int direction, float progress, boolean isTouch) {
+                LogUtils.e(progress);
             }
         });
     }

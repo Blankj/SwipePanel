@@ -1,12 +1,19 @@
 package com.blankj.swipepanel;
 
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -16,9 +23,12 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.*;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 
 import java.lang.annotation.Retention;
@@ -36,10 +46,10 @@ public class SwipePanel extends FrameLayout {
 
     private static final String TAG = "SwipePanel";
 
-    private static final int LEFT = 0;
-    private static final int TOP = 1;
-    private static final int RIGHT = 2;
-    private static final int BOTTOM = 3;
+    public static final int LEFT = 0;
+    public static final int TOP = 1;
+    public static final int RIGHT = 2;
+    public static final int BOTTOM = 3;
 
     @IntDef({LEFT, TOP, RIGHT, BOTTOM})
     @Retention(RetentionPolicy.SOURCE)
@@ -62,13 +72,10 @@ public class SwipePanel extends FrameLayout {
     private int[] mPaintColor = new int[4];
     private int[] mEdgeSizes = new int[4];
     private Drawable[] mDrawables = new Drawable[4];
-    private Bitmap[] mBitmaps = new Bitmap[4];
     private boolean[] mIsStart = new boolean[4];
     private float[] mDown = new float[4];
     private float[] progresses = new float[4];
     private float[] preProgresses = new float[4];
-    private boolean[] mCloses = new boolean[4];
-    private float[] mStartSpeed = new float[4];
     private boolean[] mIsCenter = new boolean[4];
     private boolean[] mEnabled = {true, true, true, true};
 
@@ -76,7 +83,7 @@ public class SwipePanel extends FrameLayout {
     private float mDownY;
     private float mCurrentX;
     private float mCurrentY;
-    private RectF mRectF = new RectF();
+    private Rect mRect = new Rect();
 
     private boolean mIsEdgeStart;
     private int mStartDirection = -1;
@@ -84,6 +91,8 @@ public class SwipePanel extends FrameLayout {
     private int mLimit;
 
     private OnFullSwipeListener mListener;
+
+    private OnProgressChangedListener mProgressListener;
 
     public SwipePanel(@NonNull Context context) {
         this(context, null);
@@ -205,8 +214,23 @@ public class SwipePanel extends FrameLayout {
     }
 
     private void setDrawable(Drawable drawable, int direction) {
-        if (drawable == null) return;
         mDrawables[direction] = drawable;
+    }
+
+    public Drawable getLeftDrawable() {
+        return mDrawables[LEFT];
+    }
+
+    public Drawable getTopDrawable() {
+        return mDrawables[TOP];
+    }
+
+    public Drawable getRightDrawable() {
+        return mDrawables[RIGHT];
+    }
+
+    public Drawable getBottomDrawable() {
+        return mDrawables[BOTTOM];
     }
 
     public void setLeftCenter(boolean isCenter) {
@@ -267,22 +291,41 @@ public class SwipePanel extends FrameLayout {
         mListener = listener;
     }
 
+    public void setOnProgressChangedListener(OnProgressChangedListener listener) {
+        mProgressListener = listener;
+    }
+
     public boolean isOpen(int direction) {
         return progresses[direction] >= TRIGGER_PROGRESS;
     }
 
     public void close() {
-        mCloses[LEFT] = true;
-        mCloses[TOP] = true;
-        mCloses[RIGHT] = true;
-        mCloses[BOTTOM] = true;
-        postInvalidate();
+        close(true);
     }
 
     public void close(@Direction int direction) {
-        mCloses[direction] = true;
-        mStartSpeed[direction] = 0f;
-        postInvalidate();
+        close(direction, true);
+    }
+
+    public void close(boolean isAnim) {
+        if (isAnim) {
+            animClose();
+        } else {
+            progresses[LEFT] = 0;
+            progresses[TOP] = 0;
+            progresses[RIGHT] = 0;
+            progresses[BOTTOM] = 0;
+            postInvalidate();
+        }
+    }
+
+    public void close(@Direction int direction, boolean isAnim) {
+        if (isAnim) {
+            animClose(direction);
+        } else {
+            progresses[direction] = 0;
+            postInvalidate();
+        }
     }
 
     @Override
@@ -297,7 +340,6 @@ public class SwipePanel extends FrameLayout {
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
         drawPath(canvas);
-        animClose();
     }
 
     private void drawPath(Canvas canvas) {
@@ -353,51 +395,45 @@ public class SwipePanel extends FrameLayout {
 
     private void drawIcon(Canvas canvas, int direction) {
         if (mDrawables[direction] == null) return;
-        if (mBitmaps[direction] == null || mBitmaps[direction].isRecycled()) {
-            mBitmaps[direction] = drawable2Bitmap(mDrawables[direction]);
-        }
-        if (mBitmaps[direction] == null || mBitmaps[direction].isRecycled()) {
-            Log.e(TAG, "couldn't get bitmap.");
-            return;
-        }
-        float bitmapWidth = mBitmaps[direction].getWidth();
-        float bitmapHeight = mBitmaps[direction].getHeight();
-        float fitSize = (int) (progresses[direction] * 5 * unit);
+        int dWidth = mDrawables[direction].getIntrinsicWidth();
+        int dHeight = mDrawables[direction].getIntrinsicHeight();
+        int fitSize = (int) (progresses[direction] * 5 * unit);
 
-        float width, height, deltaWidth = 0, deltaHeight = 0;
+        int width, height, deltaWidth = 0, deltaHeight = 0;
 
-        if (bitmapWidth >= bitmapHeight) {
+        if (dWidth >= dHeight) {
             width = fitSize;
-            height = width * bitmapHeight / bitmapWidth;
+            height = width * dHeight / dWidth;
             deltaHeight = fitSize - height;
         } else {
             height = fitSize;
-            width = height * bitmapWidth / bitmapHeight;
+            width = height * dWidth / dHeight;
             deltaWidth = fitSize - width;
         }
 
         if (direction == LEFT) {
-            mRectF.left = 0 + progresses[direction] * unit * 1 + deltaWidth / 2 * 1;
-            mRectF.top = mDown[LEFT] - height / 2;
-            mRectF.right = mRectF.left + width;
-            mRectF.bottom = mRectF.top + height;
+            mRect.left = (int) (0 + progresses[direction] * unit * 1 + deltaWidth / 2 * 1);
+            mRect.top = (int) (mDown[LEFT] - height / 2);
+            mRect.right = mRect.left + width;
+            mRect.bottom = mRect.top + height;
         } else if (direction == RIGHT) {
-            mRectF.right = mWidth + progresses[direction] * unit * -1 + deltaWidth / 2 * -1;
-            mRectF.top = mDown[RIGHT] - height / 2f;
-            mRectF.left = mRectF.right - width;
-            mRectF.bottom = mRectF.top + height;
+            mRect.right = (int) (mWidth + progresses[direction] * unit * -1 + deltaWidth / 2 * -1);
+            mRect.top = (int) (mDown[RIGHT] - height / 2f);
+            mRect.left = mRect.right - width;
+            mRect.bottom = mRect.top + height;
         } else if (direction == TOP) {
-            mRectF.left = mDown[TOP] - width / 2;
-            mRectF.top = 0 + progresses[direction] * unit * 1 + deltaHeight / 2 * 1;
-            mRectF.right = mRectF.left + width;
-            mRectF.bottom = mRectF.top + height;
+            mRect.left = (int) (mDown[TOP] - width / 2);
+            mRect.top = (int) (0 + progresses[direction] * unit * 1 + deltaHeight / 2 * 1);
+            mRect.right = mRect.left + width;
+            mRect.bottom = mRect.top + height;
         } else {
-            mRectF.left = mDown[BOTTOM] - width / 2;
-            mRectF.bottom = mHeight + progresses[direction] * unit * -1 + deltaHeight / 2 * -1;
-            mRectF.top = mRectF.bottom - height;
-            mRectF.right = mRectF.left + width;
+            mRect.left = (int) (mDown[BOTTOM] - width / 2);
+            mRect.bottom = (int) (mHeight + progresses[direction] * unit * -1 + deltaHeight / 2 * -1);
+            mRect.top = mRect.bottom - height;
+            mRect.right = mRect.left + width;
         }
-        canvas.drawBitmap(mBitmaps[direction], null, mRectF, null);
+        mDrawables[direction].setBounds(mRect);
+        mDrawables[direction].draw(canvas);
     }
 
     private void quad(float pathX, float pathY, int direction) {
@@ -430,34 +466,27 @@ public class SwipePanel extends FrameLayout {
     }
 
     private void animClose() {
-        boolean l = animClose(LEFT);
-        boolean u = animClose(TOP);
-        boolean r = animClose(RIGHT);
-        boolean d = animClose(BOTTOM);
-        if (l || u || r || d) {
-            postInvalidateDelayed(0);
-        }
+        animClose(LEFT);
+        animClose(TOP);
+        animClose(RIGHT);
+        animClose(BOTTOM);
     }
 
-    private boolean animClose(int direction) {
-        if (mCloses[direction]) {
-            if (progresses[direction] > 0) {
-                Activity activity = getActivityByView(this);
-                if (activity != null && activity.isFinishing()) {
-                    progresses[direction] = 0;
-                    mCloses[direction] = false;
-                    return true;
+    private void animClose(final int direction) {
+        if (progresses[direction] > 0) {
+            final ValueAnimator anim = ValueAnimator.ofFloat(progresses[direction], 0);
+            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    progresses[direction] = (float) anim.getAnimatedValue();
+                    if (mProgressListener != null) {
+                        mProgressListener.onProgressChanged(direction, progresses[direction], false);
+                    }
+                    postInvalidate();
                 }
-                progresses[direction] -= mStartSpeed[direction];
-                if (progresses[direction] <= 0) {
-                    progresses[direction] = 0;
-                    mCloses[direction] = false;
-                }
-                mStartSpeed[direction] += 0.1;
-                return true;
-            }
+            });
+            anim.setDuration(100).start();
         }
-        return false;
     }
 
     @SuppressLint("WrongConstant")
@@ -509,6 +538,9 @@ public class SwipePanel extends FrameLayout {
                     progresses[mStartDirection] = calculateProgress();
                     if (Math.abs(preProgress - progresses[mStartDirection]) > 0.01) {
                         postInvalidate();
+                        if (mProgressListener != null) {
+                            mProgressListener.onProgressChanged(mStartDirection, progresses[mStartDirection], true);
+                        }
                     } else {
                         preProgresses[mStartDirection] = preProgress;
                     }
@@ -523,7 +555,7 @@ public class SwipePanel extends FrameLayout {
                             mListener.onFullSwipe(mStartDirection);
                         }
                     } else {
-                        close(mStartDirection);
+                        close(mStartDirection, true);
                     }
                 }
             }
@@ -666,5 +698,9 @@ public class SwipePanel extends FrameLayout {
 
     public interface OnFullSwipeListener {
         void onFullSwipe(@Direction int direction);
+    }
+
+    public interface OnProgressChangedListener {
+        void onProgressChanged(@Direction int direction, float progress, boolean isTouch);
     }
 }

@@ -14,7 +14,7 @@
 
 Gradle:
 ```groovy
-implementation 'com.blankj:swipe-panel:1.1'
+implementation 'com.blankj:swipe-panel:1.2'
 ```
 
 
@@ -70,6 +70,7 @@ swipePanel.setOnFullSwipeListener(new SwipePanel.OnFullSwipeListener() {// 设�
 |setLeft(Top, Right, Bottom)Enabled   |app:isLeft(Top, Right, Bottom)Enabled |设置左（上、右、下）侧是否可用|
 |wrapView                             |---                                   |设置嵌套在该 view 的外层|
 |setOnFullSwipeListener               |---                                   |设置完全划开松手后的监听|
+|setOnProgressChangedListener         |---                                   |设置进度变化的监听|
 |isOpen                               |---                                   |判断是否被划开|
 |close                                |---                                   |关闭|
 
