@@ -2,9 +2,7 @@ package com.blankj.swipepanel;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -624,20 +622,6 @@ public class SwipePanel extends FrameLayout {
             getChildAt(i).dispatchTouchEvent(cancelEvent);
         }
         cancelEvent.recycle();
-    }
-
-    private static Activity getActivityByView(@NonNull View view) {
-        return getActivityByContext(view.getContext());
-    }
-
-    private static Activity getActivityByContext(@NonNull Context context) {
-        while (context instanceof ContextWrapper) {
-            if (context instanceof Activity) {
-                return (Activity) context;
-            }
-            context = ((ContextWrapper) context).getBaseContext();
-        }
-        return null;
     }
 
     private static int dp2px(final float dpValue) {
