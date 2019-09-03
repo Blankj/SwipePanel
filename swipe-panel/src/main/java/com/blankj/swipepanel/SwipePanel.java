@@ -7,14 +7,11 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.SystemClock;
@@ -350,7 +347,7 @@ public class SwipePanel extends FrameLayout {
     }
 
     private void drawPath(Canvas canvas, int direction) {
-        if (mPath[direction] == null) return;
+        if (mPath[direction] == null || progresses[direction] <= 0) return;
         updatePaint(direction);
         canvas.drawPath(getPath(direction), mPaint);
         drawIcon(canvas, direction);
@@ -648,33 +645,7 @@ public class SwipePanel extends FrameLayout {
         return (int) (dpValue * scale + 0.5f);
     }
 
-    private static Bitmap drawable2Bitmap(final Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if (bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
-            }
-        }
-        Bitmap bitmap;
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1,
-                    drawable.getOpacity() != PixelFormat.OPAQUE
-                            ? Bitmap.Config.ARGB_8888
-                            : Bitmap.Config.RGB_565);
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
-                    drawable.getIntrinsicHeight(),
-                    drawable.getOpacity() != PixelFormat.OPAQUE
-                            ? Bitmap.Config.ARGB_8888
-                            : Bitmap.Config.RGB_565);
-        }
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
-    }
-
-    private static final Object sLock = new Object();
+    private static final Object LOCK = new Object();
 
     private static TypedValue sTempValue;
 
@@ -685,7 +656,7 @@ public class SwipePanel extends FrameLayout {
             return context.getResources().getDrawable(id);
         } else {
             final int resolvedId;
-            synchronized (sLock) {
+            synchronized (LOCK) {
                 if (sTempValue == null) {
                     sTempValue = new TypedValue();
                 }
